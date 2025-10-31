@@ -8,7 +8,8 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Install Python dependencies
-# Using --trusted-host to handle SSL issues in some environments
+# Note: --trusted-host flags are used to work around SSL certificate issues in some build environments.
+# In production, ensure proper SSL certificates are configured. These flags only affect the build process.
 RUN pip install --no-cache-dir --trusted-host pypi.org --trusted-host files.pythonhosted.org -r requirements.txt
 
 # Copy application files

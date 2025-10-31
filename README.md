@@ -76,10 +76,11 @@ Docker Compose simplifies running the bot by managing configuration in a single 
 
 1. Prepare your configuration files (config.yaml, secrets.yaml, and media directory)
 
-2. Create an empty visited.pickledb file (will be populated by the bot):
+2. Create an empty visited.pickledb file (required for Docker bind mount, will be populated by the bot):
 ```bash
 $ echo '{}' > visited.pickledb
 ```
+Note: Docker requires the file to exist before mounting. The bot will initialize and use this file to track posted images.
 
 3. Run with Docker Compose:
 ```bash
@@ -107,11 +108,12 @@ The Docker setup uses volume mounts to access your configuration and data:
 
 ### Scheduling with Docker
 
-To run the bot at regular intervals, you can use:
+The bot is designed to post one image and exit immediately. To post at regular intervals, schedule it to run periodically using one of these methods:
 
 **Option 1: Cron job**
 ```bash
 # Add to crontab (run every 4 hours)
+# Note: 'docker compose run --rm' creates a new container for each run, which is the intended behavior
 0 */4 * * * cd /path/to/mastodon-bot && docker compose run --rm mastodon-bot
 ```
 
