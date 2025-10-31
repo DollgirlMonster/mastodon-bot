@@ -144,8 +144,8 @@ WantedBy=timers.target
 
 Enable the timer:
 ```bash
-# systemctl enable mastodon-bot.timer
-# systemctl start mastodon-bot.timer
+$ sudo systemctl enable mastodon-bot.timer
+$ sudo systemctl start mastodon-bot.timer
 ```
 
 
