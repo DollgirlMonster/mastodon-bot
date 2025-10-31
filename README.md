@@ -68,25 +68,32 @@ $ docker run --rm \
   mastodon-bot
 ```
 
+Note: The `visited.pickledb` file will be created automatically on first run if it doesn't exist.
+
 ### Using Docker Compose (Recommended)
 
 Docker Compose simplifies running the bot by managing configuration in a single file.
 
 1. Prepare your configuration files (config.yaml, secrets.yaml, and media directory)
 
-2. Run with Docker Compose:
+2. Create an empty visited.pickledb file (will be populated by the bot):
 ```bash
-$ docker-compose up
+$ echo '{}' > visited.pickledb
+```
+
+3. Run with Docker Compose:
+```bash
+$ docker compose up
 ```
 
 To run in the background:
 ```bash
-$ docker-compose up -d
+$ docker compose up -d
 ```
 
 To stop the bot:
 ```bash
-$ docker-compose down
+$ docker compose down
 ```
 
 ### Volume Mounts Explained
@@ -105,7 +112,7 @@ To run the bot at regular intervals, you can use:
 **Option 1: Cron job**
 ```bash
 # Add to crontab (run every 4 hours)
-0 */4 * * * cd /path/to/mastodon-bot && docker-compose up
+0 */4 * * * cd /path/to/mastodon-bot && docker compose run --rm mastodon-bot
 ```
 
 **Option 2: systemd timer with Docker**
@@ -119,7 +126,7 @@ After=docker.service
 [Service]
 Type=oneshot
 WorkingDirectory=/path/to/mastodon-bot
-ExecStart=/usr/bin/docker-compose up
+ExecStart=/usr/bin/docker compose run --rm mastodon-bot
 ```
 
 Create `/etc/systemd/system/mastodon-bot.timer`:
