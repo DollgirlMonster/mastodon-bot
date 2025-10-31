@@ -1,0 +1,23 @@
+services:
+  mastodon-bot:
+    build: .
+    image: mastodon-bot:latest
+    container_name: mastodon-bot
+    volumes:
+      # Mount your config file (required)
+      - ./config.yaml:/app/config.yaml:ro
+      # Mount your secrets file (required)
+      - ./secrets.yaml:/app/secrets.yaml:ro
+      # Mount your media directory (required)
+      - ./media:/app/media:ro
+      # Persist visited database (optional, will be created automatically)
+      - visited-db:/app
+      # Uncomment if you have an info database file:
+      # - ./info.pickledb:/app/info.pickledb:ro
+    environment:
+      # Optional: Override config values with environment variables if needed
+      - TZ=UTC
+    restart: unless-stopped
+
+volumes:
+  visited-db:

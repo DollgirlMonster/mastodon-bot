@@ -40,6 +40,108 @@ $ python bot.py
 This will post the next image and return immediately.
 
 
+## Running with Docker
+
+### Prerequisites
+- Docker installed on your system
+- Docker Compose (optional, for easier configuration)
+
+### Quick Start with Docker
+
+1. Prepare your configuration files as described in the Quick Start section above:
+   - Copy `default.config.yaml` to `config.yaml` and edit accordingly
+   - Copy `default.secrets.yaml` to `secrets.yaml` and add your credentials
+   - Create a `media` directory with your images
+
+2. Build the Docker image:
+```bash
+$ docker build -t mastodon-bot .
+```
+
+3. Run the bot with Docker:
+```bash
+$ docker run --rm \
+  -v $(pwd)/config.yaml:/app/config.yaml:ro \
+  -v $(pwd)/secrets.yaml:/app/secrets.yaml:ro \
+  -v $(pwd)/media:/app/media:ro \
+  -v $(pwd)/visited.pickledb:/app/visited.pickledb \
+  mastodon-bot
+```
+
+### Using Docker Compose (Recommended)
+
+Docker Compose simplifies running the bot by managing configuration in a single file.
+
+1. Prepare your configuration files (config.yaml, secrets.yaml, and media directory)
+
+2. Run with Docker Compose:
+```bash
+$ docker-compose up
+```
+
+To run in the background:
+```bash
+$ docker-compose up -d
+```
+
+To stop the bot:
+```bash
+$ docker-compose down
+```
+
+### Volume Mounts Explained
+
+The Docker setup uses volume mounts to access your configuration and data:
+- `config.yaml`: Your bot configuration (read-only)
+- `secrets.yaml`: Your Mastodon credentials (read-only)
+- `media/`: Directory containing images to post (read-only)
+- `visited.pickledb`: Database tracking posted images (read-write, persisted)
+- `info.pickledb`: Optional info database (read-only)
+
+### Scheduling with Docker
+
+To run the bot at regular intervals, you can use:
+
+**Option 1: Cron job**
+```bash
+# Add to crontab (run every 4 hours)
+0 */4 * * * cd /path/to/mastodon-bot && docker-compose up
+```
+
+**Option 2: systemd timer with Docker**
+Create `/etc/systemd/system/mastodon-bot.service`:
+```
+[Unit]
+Description=Mastodon Image Bot (Docker)
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/path/to/mastodon-bot
+ExecStart=/usr/bin/docker-compose up
+```
+
+Create `/etc/systemd/system/mastodon-bot.timer`:
+```
+[Unit]
+Description=Timer for Mastodon Image Bot
+
+[Timer]
+OnBootSec=15min
+OnUnitActiveSec=4h
+
+[Install]
+WantedBy=timers.target
+```
+
+Enable the timer:
+```bash
+# systemctl enable mastodon-bot.timer
+# systemctl start mastodon-bot.timer
+```
+
+
 ## Info-DB
 Info-DB is an optional feature. The image does not need to have an entry in the Info-DB to be posted.
 It is a json file with list of items as follows

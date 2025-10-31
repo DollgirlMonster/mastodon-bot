@@ -2,6 +2,12 @@
 /secrets.yaml
 /cache.yaml
 
+# Media directory (user data)
+/media/
+
+# Pickle databases
+*.pickledb
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
