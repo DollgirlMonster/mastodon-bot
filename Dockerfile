@@ -16,6 +16,10 @@ RUN pip install --no-cache-dir --trusted-host pypi.org --trusted-host files.pyth
 COPY bot.py .
 COPY default.config.yaml .
 COPY default.secrets.yaml .
+COPY scheduler.sh .
+
+# Make scheduler script executable
+RUN chmod +x scheduler.sh
 
 # Create directory for media files
 RUN mkdir -p /app/media

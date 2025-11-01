@@ -72,7 +72,11 @@ Note: The `visited.pickledb` file will be created automatically on first run if 
 
 ### Using Docker Compose (Recommended)
 
-Docker Compose simplifies running the bot by managing configuration in a single file.
+Docker Compose simplifies running the bot by managing configuration in a single file. There are two ways to run the bot:
+
+#### Option A: Scheduled Execution (Built-in Scheduler)
+
+The bot can run on a schedule within the container without requiring external cron or systemd.
 
 1. Prepare your configuration files (config.yaml, secrets.yaml, and media directory)
 
@@ -82,19 +86,33 @@ $ echo '{}' > visited.pickledb
 ```
 Note: Docker requires the file to exist before mounting. The bot will initialize and use this file to track posted images.
 
-3. Run with Docker Compose:
+3. Start the scheduled bot service:
 ```bash
-$ docker compose up
+$ docker compose up -d mastodon-bot-scheduled
 ```
 
-To run in the background:
+4. Configure the schedule interval by setting the `SCHEDULE_INTERVAL` environment variable in docker-compose.yml:
+   - `4h` = every 4 hours (default)
+   - `30m` = every 30 minutes
+   - `1d` = every day
+   - `3600s` = every 3600 seconds
+
+5. View logs:
 ```bash
-$ docker compose up -d
+$ docker compose logs -f mastodon-bot-scheduled
 ```
 
-To stop the bot:
+6. Stop the scheduled bot:
 ```bash
 $ docker compose down
+```
+
+#### Option B: Manual One-off Execution
+
+For manual control or external scheduling (cron/systemd):
+
+```bash
+$ docker compose run --rm mastodon-bot
 ```
 
 ### Volume Mounts Explained
@@ -106,9 +124,9 @@ The Docker setup uses volume mounts to access your configuration and data:
 - `visited.pickledb`: Database tracking posted images (read-write, persisted)
 - `info.pickledb`: Optional info database (read-only)
 
-### Scheduling with Docker
+### Alternative Scheduling Methods
 
-The bot is designed to post one image and exit immediately. To post at regular intervals, schedule it to run periodically using one of these methods:
+The bot is designed to post one image and exit immediately. Besides the built-in scheduler (see "Option A: Scheduled Execution" above), you can also use host-system scheduling:
 
 **Option 1: Cron job**
 ```bash
