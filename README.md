@@ -98,12 +98,17 @@ $ docker compose up -d mastodon-bot-scheduled
    - `1d` = every day
    - `3600s` = every 3600 seconds
 
-5. View logs:
+5. (Optional) Allow reposting already-visited images by setting `ALLOW_REPOST_VISITED=true` in docker-compose.yml:
+   - By default, the bot tracks which images have been posted and won't post them again
+   - Set `ALLOW_REPOST_VISITED=true` to bypass this check and allow posting images multiple times
+   - Uncomment the `ALLOW_REPOST_VISITED` line in docker-compose.yml and set it to `true` to enable this feature
+
+6. View logs:
 ```bash
 $ docker compose logs -f mastodon-bot-scheduled
 ```
 
-6. Stop the scheduled bot:
+7. Stop the scheduled bot:
 ```bash
 $ docker compose down
 ```
@@ -122,7 +127,7 @@ The Docker setup uses volume mounts to access your configuration and data:
 - `config.yaml`: Your bot configuration (read-only)
 - `secrets.yaml`: Your Mastodon credentials (read-only)
 - `media/`: Directory containing images to post (read-only)
-- `visited.pickledb`: Database tracking posted images (read-write, persisted)
+- `visited.pickledb`: Database tracking posted images (read-write, persisted). Set `ALLOW_REPOST_VISITED=true` to bypass this tracking.
 - `info.pickledb`: Optional info database (read-only)
 
 ### Alternative Scheduling Methods

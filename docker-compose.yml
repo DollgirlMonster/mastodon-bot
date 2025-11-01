@@ -24,6 +24,9 @@ services:
     environment:
       # Optional: Override config values with environment variables if needed
       - TZ=UTC
+      # Optional: Set to "true" to allow posting images that have already been posted
+      # This bypasses the visited.pickledb tracking. Default: "false"
+      # - ALLOW_REPOST_VISITED=false
     restart: "no"
     profiles:
       - manual
@@ -57,4 +60,7 @@ services:
       # Schedule interval: Xs (seconds), Xm (minutes), Xh (hours), Xd (days)
       # Default: 4h (4 hours)
       - SCHEDULE_INTERVAL=4h
+      # Optional: Set to "true" to allow posting images that have already been posted
+      # This bypasses the visited.pickledb tracking. Default: "false"
+      # - ALLOW_REPOST_VISITED=false
     restart: unless-stopped

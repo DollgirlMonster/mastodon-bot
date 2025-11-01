@@ -133,12 +133,21 @@ def is_supported_image_file(image_path):
 class ImageEnumeratorBase:
     def __init__(self, image_dir):
         self.visited_db = pickledb.load('visited.pickledb', True)
+        # Check if we should allow reposting visited images
+        self.allow_repost = os.environ.get('ALLOW_REPOST_VISITED', 'false').lower() == 'true'
+        if self.allow_repost:
+            print('ALLOW_REPOST_VISITED is enabled - visited images will be included')
         # enumerate all images in the tree
         print('enumerating files in image dir...')
         self.image_list = ImageEnumeratorBase.get_file_list(image_dir)
         print('found %d files'%len(self.image_list))
-        # reject unknown and visited elements
-        self.image_list = [x for x in self.image_list if not self.is_visited(x) and is_supported_image_file(x)]
+        # reject unknown and optionally visited elements
+        if self.allow_repost:
+            # Only filter by file type, not by visited status
+            self.image_list = [x for x in self.image_list if is_supported_image_file(x)]
+        else:
+            # Filter by both visited status and file type
+            self.image_list = [x for x in self.image_list if not self.is_visited(x) and is_supported_image_file(x)]
         print('after rejection %d images left'%len(self.image_list))
 
 
