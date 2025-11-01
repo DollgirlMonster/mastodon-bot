@@ -15,8 +15,12 @@ services:
       # Persist visited database (will be created automatically on first run)
       # Mount as a bind mount to persist in current directory
       - ./visited.pickledb:/app/visited.pickledb
+      # Persist visited texts database (will be created automatically on first run)
+      - ./visited_texts.pickledb:/app/visited_texts.pickledb
       # Uncomment if you have an info database file:
       # - ./info.pickledb:/app/info.pickledb:ro
+      # Uncomment if you want to use a post texts file:
+      # - ./post_texts.txt:/app/post_texts.txt:ro
     environment:
       # Optional: Override config values with environment variables if needed
       - TZ=UTC
@@ -41,8 +45,12 @@ services:
       # Persist visited database (will be created automatically on first run)
       # Mount as a bind mount to persist in current directory
       - ./visited.pickledb:/app/visited.pickledb
+      # Persist visited texts database (will be created automatically on first run)
+      - ./visited_texts.pickledb:/app/visited_texts.pickledb
       # Uncomment if you have an info database file:
       # - ./info.pickledb:/app/info.pickledb:ro
+      # Uncomment if you want to use a post texts file:
+      # - ./post_texts.txt:/app/post_texts.txt:ro
     environment:
       # Optional: Override config values with environment variables if needed
       - TZ=UTC

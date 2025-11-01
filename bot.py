@@ -76,6 +76,52 @@ class InfoDb:
         return ''
 
 
+class PostTextProvider:
+    def __init__(self, post_texts_file, order, default_text):
+        self.default_text = default_text if default_text else ''
+        self.order = order
+        self.texts = []
+        self.visited_db = pickledb.load('visited_texts.pickledb', True)
+        
+        if post_texts_file:
+            try:
+                print('loading post texts from:', post_texts_file)
+                with open(post_texts_file, 'r', encoding='utf-8') as f:
+                    # Read all lines, strip whitespace, and filter out empty lines
+                    self.texts = [line.strip() for line in f.readlines() if line.strip()]
+                print('loaded %d post texts'%len(self.texts))
+                
+                # Filter out visited texts
+                self.texts = [t for t in self.texts if not self.is_visited(t)]
+                print('after filtering visited texts: %d texts left'%len(self.texts))
+                
+                if self.order == 'seq':
+                    # Keep original order for sequential
+                    pass
+                elif self.order == 'random':
+                    # Shuffle for random selection
+                    random.shuffle(self.texts)
+            except Exception as e:
+                print('warning: failed to load post texts file:', e)
+                print('falling back to default_desc')
+    
+    def get(self) -> str:
+        if len(self.texts) > 0:
+            # Use the first text (either in original order or shuffled)
+            text = self.texts[0]
+            print('selected post text:', text[:50] + ('...' if len(text) > 50 else ''))
+            return text
+        else:
+            print('no post texts available, using default_desc')
+            return self.default_text
+    
+    def is_visited(self, text) -> bool:
+        return self.visited_db.exists(text)
+    
+    def set_visited(self, text):
+        self.visited_db.set(text, True)
+
+
 
 def is_supported_image_file(image_path):
     exts =['gif', 'png', 'jpg', 'jpeg', 'mp4', 'mov', 'webm']
@@ -179,13 +225,19 @@ def main():
         print('invalid "order" parameter')
         die()
 
+    # Initialize post text provider
+    post_texts_file = config.get('post_texts_file', None)
+    default_desc = config['default_desc'] if config['default_desc'] else ''
+    text_provider = PostTextProvider(post_texts_file, config['order'], default_desc)
+
     image_path:str = image_provider.get()
     if image_path is None:
         print('failed to obtain next image in the sequence')
         die()    
 
     if image_path != None:
-        desc:str = config['default_desc'] if config['default_desc'] else ''
+        selected_text:str = text_provider.get()
+        desc:str = selected_text
         tags:str = config['default_tags'] if config['default_tags'] else ''
 
         info:str = infodb.get_info(os.path.relpath(image_path, image_dir))
@@ -221,6 +273,7 @@ def main():
             # Mark as visited so we dont post twice.
             # Do this only if posting is successful.
             image_provider.set_visited(image_path)
+            text_provider.set_visited(selected_text)
         # clean up temp file
         if image_path_resized:
             os.remove(image_path_resized)

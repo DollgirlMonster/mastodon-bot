@@ -7,6 +7,7 @@ Features:
 * images are sourced from a local directory
 * pick images randomly or sequentially
 * remember the list of already processed images so that each is posted only once
+* **use different post texts from a file** - each post can have a different text description
 * append text tags like #gif or #video depending on media type
 * read the Info-DB for extra data like description and source
 * custom text and tags to add with every image
@@ -168,6 +169,32 @@ $ sudo systemctl enable mastodon-bot.timer
 $ sudo systemctl start mastodon-bot.timer
 ```
 
+
+## Post Texts File
+You can configure the bot to use different text descriptions for each post instead of using a fixed text. This is an optional feature.
+
+To use this feature:
+1. Create a text file (e.g., `post_texts.txt`) with one post text per line
+2. In your `config.yaml`, set `post_texts_file: post_texts.txt`
+3. If using Docker, uncomment the volume mount in `docker-compose.yml`:
+   ```yaml
+   - ./post_texts.txt:/app/post_texts.txt:ro
+   ```
+
+Example `post_texts.txt`:
+```
+Check out this awesome image!
+Here's something interesting for you
+Another beautiful moment captured
+Look what I found today
+```
+
+The bot will:
+* Load all texts from the file (one per line)
+* Skip empty lines
+* Use texts in sequential or random order (based on the `order` setting in config.yaml)
+* Remember which texts have been used (stored in `visited_texts.pickledb`)
+* Fall back to `default_desc` if no texts file is specified or if all texts have been used
 
 ## Info-DB
 Info-DB is an optional feature. The image does not need to have an entry in the Info-DB to be posted.

@@ -8,7 +8,13 @@ secrets: secrets.yaml
 image_dir: media
 
 ## text description of your toot. Note: do not put tags here, use default_tags
+## This is used as a fallback if post_texts_file is not specified or empty
 default_desc:
+
+## path to a text file containing post texts (one per line)
+## If specified, each post will use a different text from the file
+## Empty lines are ignored. Leave commented out to use default_desc instead
+# post_texts_file: post_texts.txt
 
 ## default tags of your toot
 default_tags: "#bot"
