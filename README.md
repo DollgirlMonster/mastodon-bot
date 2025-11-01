@@ -40,6 +40,135 @@ $ python bot.py
 This will post the next image and return immediately.
 
 
+## Running with Docker
+
+### Prerequisites
+- Docker installed on your system
+- Docker Compose (optional, for easier configuration)
+
+### Quick Start with Docker
+
+1. Prepare your configuration files as described in the Quick Start section above:
+   - Copy `default.config.yaml` to `config.yaml` and edit accordingly
+   - Copy `default.secrets.yaml` to `secrets.yaml` and add your credentials
+   - Create a `media` directory with your images
+
+2. Build the Docker image:
+```bash
+$ docker build -t mastodon-bot .
+```
+
+3. Run the bot with Docker:
+```bash
+$ docker run --rm \
+  -v $(pwd)/config.yaml:/app/config.yaml:ro \
+  -v $(pwd)/secrets.yaml:/app/secrets.yaml:ro \
+  -v $(pwd)/media:/app/media:ro \
+  -v $(pwd)/visited.pickledb:/app/visited.pickledb \
+  mastodon-bot
+```
+
+Note: The `visited.pickledb` file will be created automatically on first run if it doesn't exist.
+
+### Using Docker Compose (Recommended)
+
+Docker Compose simplifies running the bot by managing configuration in a single file. There are two ways to run the bot:
+
+#### Option A: Scheduled Execution (Built-in Scheduler)
+
+The bot can run on a schedule within the container without requiring external cron or systemd.
+
+1. Prepare your configuration files (config.yaml, secrets.yaml, and media directory)
+
+2. Create an empty visited.pickledb file (required for Docker bind mount, will be populated by the bot):
+```bash
+$ echo '{}' > visited.pickledb
+```
+Note: Docker requires the file to exist before mounting. The bot will initialize and use this file to track posted images.
+
+3. Start the scheduled bot service:
+```bash
+$ docker compose up -d mastodon-bot-scheduled
+```
+
+4. Configure the schedule interval by setting the `SCHEDULE_INTERVAL` environment variable in docker-compose.yml:
+   - `4h` = every 4 hours (default)
+   - `30m` = every 30 minutes
+   - `1d` = every day
+   - `3600s` = every 3600 seconds
+
+5. View logs:
+```bash
+$ docker compose logs -f mastodon-bot-scheduled
+```
+
+6. Stop the scheduled bot:
+```bash
+$ docker compose down
+```
+
+#### Option B: Manual One-off Execution
+
+For manual control or external scheduling (cron/systemd):
+
+```bash
+$ docker compose run --rm mastodon-bot
+```
+
+### Volume Mounts Explained
+
+The Docker setup uses volume mounts to access your configuration and data:
+- `config.yaml`: Your bot configuration (read-only)
+- `secrets.yaml`: Your Mastodon credentials (read-only)
+- `media/`: Directory containing images to post (read-only)
+- `visited.pickledb`: Database tracking posted images (read-write, persisted)
+- `info.pickledb`: Optional info database (read-only)
+
+### Alternative Scheduling Methods
+
+The bot is designed to post one image and exit immediately. Besides the built-in scheduler (see "Option A: Scheduled Execution" above), you can also use host-system scheduling:
+
+**Option 1: Cron job**
+```bash
+# Add to crontab (run every 4 hours)
+# Note: 'docker compose run --rm' creates a new container for each run, which is the intended behavior
+0 */4 * * * cd /path/to/mastodon-bot && docker compose run --rm mastodon-bot
+```
+
+**Option 2: systemd timer with Docker**
+Create `/etc/systemd/system/mastodon-bot.service`:
+```
+[Unit]
+Description=Mastodon Image Bot (Docker)
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/path/to/mastodon-bot
+ExecStart=/usr/bin/docker compose run --rm mastodon-bot
+```
+
+Create `/etc/systemd/system/mastodon-bot.timer`:
+```
+[Unit]
+Description=Timer for Mastodon Image Bot
+
+[Timer]
+OnBootSec=15min
+OnUnitActiveSec=4h
+
+[Install]
+WantedBy=timers.target
+```
+
+Enable the timer:
+```bash
+$ sudo systemctl enable mastodon-bot.timer
+$ sudo systemctl start mastodon-bot.timer
+```
+
+
 ## Info-DB
 Info-DB is an optional feature. The image does not need to have an entry in the Info-DB to be posted.
 It is a json file with list of items as follows

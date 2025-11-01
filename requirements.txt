@@ -2,4 +2,4 @@ mastodon.py
 pyyaml
 Pillow
 setuptools
-pickledb
+pickledb==0.9.2

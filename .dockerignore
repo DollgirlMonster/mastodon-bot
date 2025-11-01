@@ -1,0 +1,40 @@
+# Git files
+.git
+.gitignore
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# User-specific config files
+config.yaml
+secrets.yaml
+cache.yaml
+
+# Database files
+*.pickledb
+
+# Media files (will be mounted as volume)
+media/
+
+# Documentation
+LICENSE
+README.md
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
